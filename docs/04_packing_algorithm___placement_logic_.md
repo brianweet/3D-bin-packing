@@ -123,18 +123,18 @@ sequenceDiagram
     participant PlacedItem as Item (Already in Bin)
 
     Packer->>Bin: Try placing ItemToPlace in this Bin (calls pack2Bin)
-    Note over Bin: pack2Bin finds potential pivot points...
+    Note over Bin: pack2Bin finds potential pivot points
     Bin->>Bin: Identify pivot points (e.g., [0,0,0], corners of PlacedItem)
     loop For each Pivot Point
         Bin->>Bin: Try placing ItemToPlace at Pivot (calls putItem)
-        Note over Bin: putItem(ItemToPlace, Pivot) starts checks...
+        Note over Bin: putItem(ItemToPlace, Pivot) starts checks
         loop For each allowed Rotation of ItemToPlace
             Bin->>ItemToPlace: Get dimensions for this rotation
             Bin->>Bin: Check: Fits within bin boundaries?
-            Bin->>PlacedItem: Check: Intersects with PlacedItem? (using intersect logic)
+            Bin->>PlacedItem: Check: Intersects with PlacedItem?
             Bin->>Bin: Check: Bin weight limit okay?
             opt fix_point enabled
-               Bin->>Bin: Adjust position downwards (gravity)
+                Bin->>Bin: Adjust position downwards (gravity)
             end
             opt check_stable enabled
                 Bin->>Bin: Check stability (surface ratio, vertices)
@@ -144,14 +144,14 @@ sequenceDiagram
                 Bin->>Bin: Add ItemToPlace to bin.items list
                 Bin->>Bin: Update internal occupied space map (fit_items)
                 Bin->>Packer: Report SUCCESS (Item placed!)
-                Note over Packer: Move to next item...
-                break # Stop trying pivots/rotations
+                Note over Packer: Move to next item
+                break
             else Checks Failed
-                Note over Bin: Try next rotation...
+                Note over Bin: Try next rotation
             end
-        end # End Rotation Loop
-        Note over Bin: If no rotation worked for this pivot, try next pivot...
-    end # End Pivot Loop
+        end
+        Note over Bin: If no rotation worked for this pivot, try next pivot
+    end
     alt Item Could Not Be Placed in Any Way
         Bin->>Bin: Add ItemToPlace to bin.unfitted_items
         Bin->>Packer: Report FAILURE (Item did not fit)
