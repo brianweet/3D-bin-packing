@@ -1,0 +1,43 @@
+name: Generate AI Documentation
+
+on:
+  workflow_dispatch: # Allows manual triggering
+  # schedule: # Example: Run weekly
+  #   - cron: '0 0 * * 0'
+
+jobs:
+  generate_docs_and_pr:
+    runs-on: ubuntu-latest
+    # Permissions needed within THIS repository (target-repo)
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      # 1. Checkout THIS repository's code (target-repo)
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Run the documentation generation action
+      - name: Generate Documentation
+        uses: ingka-group-digital/ai-generate-docs@v0.2.4-alpha # Use your action repo
+        with:
+          # Pass the API key securely from secrets IN THIS REPO (target-repo)
+          api-key: ${{ secrets.OPENAI_API_KEY }}
+          # Tell the action to analyze THIS repository
+          # target-repo-url: ${{ github.server_url }}/${{ github.repository }}
+          target-repo-url: 'https://github.com/brianweet/3D-bin-packing'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # 3. Create a Pull Request in THIS repository (target-repo)
+      - name: Create Pull Request For Docs
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # Uses token scoped to target-repo
+          commit-message: 'docs: Regenerate AI documentation'
+          title: 'Update AI Generated Documentation'
+          body: |
+            Automated documentation update via the ai-generate-docs action.
+            Please review the changes.
+          branch: 'ai-docs-updates'
+          delete-branch: true
